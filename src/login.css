@@ -1,0 +1,290 @@
+@import url("https://fonts.googleapis.com/css2?family=Almendra:wght@700&family=Inter:wght@600;700&family=Source+Code+Pro:wght@400;500&display=swap");
+
+:root {
+  --reg-bg-top: #090e19;
+  --reg-bg-bottom: #1e293b;
+  --reg-panel: rgba(20, 30, 50, 0.6);
+  --reg-field: #d9d9d9;
+  --reg-placeholder: #7488a8;
+  --reg-brand: #8da2c0;
+  --reg-text-soft: #b8c2d1;
+  --reg-title-bg: #1e293b;
+  --reg-title-border: #3b4659;
+  --reg-accent: #8fb0e0;
+  --reg-error: #ff8a8a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+/* ---------- Halaman + kartu dua kolom ---------- */
+.register-container {
+  display: grid;
+  grid-template-columns: 306px 1fr;
+  width: calc(100% - 48px);
+  max-width: 790px;
+  min-height: 446px;
+  margin: 0 auto;
+  position: relative;
+  top: 50vh;
+  transform: translateY(-50%);
+  background: var(--reg-panel);
+  border: 2px solid #000;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* latar gradasi satu layar penuh */
+body:has(.register-container) {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--reg-bg-top) 0%, var(--reg-bg-bottom) 100%);
+  background-attachment: fixed;
+}
+
+/* ---------- Panel kiri: Brand ---------- */
+.Brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px;
+  border-right: 2px solid #000;
+  text-align: center;
+}
+
+.Brand h1 {
+  margin: 8px 0 0;
+  font-family: "Almendra", serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--reg-brand);
+}
+
+/* logo tampil di atas nama walau di JSX ada di bawah h1 */
+.logo {
+  order: -1;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--reg-field);
+  color: transparent;      /* sembunyikan teks alt saat src belum ada */
+  font-size: 0;
+}
+
+/* tagline tanpa perlu ubah JSX */
+.Brand::after {
+  content: "Trade Game Items at the Speed of Blockchain.";
+  margin-top: 34px;
+  max-width: 230px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 1.65rem;
+  line-height: 1.45;
+  color: var(--reg-text-soft);
+}
+
+/* ---------- Panel kanan: kartu form ---------- */
+.register-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.subtitle {
+  width: 100%;
+  max-width: 208px;
+  margin: 0 0 18px;
+  padding: 8px 0;
+  text-align: center;
+  font-family: "Source Code Pro", monospace;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--reg-accent);
+  background: var(--reg-title-bg);
+  border: 1px solid var(--reg-title-border);
+  border-radius: 6px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 208px;
+}
+
+.input-group {
+  width: 100%;
+  margin-bottom: 11px;
+}
+
+/* label field disembunyikan secara visual (desain pakai placeholder),
+   tetap terbaca screen reader */
+.input-group > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.input-group input[type="text"],
+.input-group input[type="password"],
+.input-group input[type="email"] {
+  width: 100%;
+  height: 33px;
+  padding: 0 14px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1a2233;
+  background: var(--reg-field);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.input-group input::placeholder {
+  color: var(--reg-placeholder);
+  font-weight: 700;
+}
+
+.input-group input[type="text"]:focus-visible,
+.input-group input[type="password"]:focus-visible,
+.input-group input[type="email"]:focus-visible {
+  border-color: var(--reg-accent);
+}
+
+/* ---------- Gender ---------- */
+.radio-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 2px;
+}
+
+.radio-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.radio-group input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"]:checked {
+  background: var(--reg-accent);
+  box-shadow: inset 0 0 0 2px var(--reg-bg-top);
+}
+
+.radio-group input[type="radio"]:focus-visible {
+  outline: 2px solid var(--reg-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Error ---------- */
+.error-message {
+  width: 100%;
+  margin: 2px 0 8px;
+  text-align: center;
+}
+
+.error-message p {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--reg-error);
+}
+
+/* ---------- Tombol ---------- */
+.btn-submit {
+  padding: 9px 16px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #000;
+  background: var(--reg-field);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-submit:hover {
+  background: #fff;
+}
+
+.btn-submit:focus-visible {
+  outline: 2px solid var(--reg-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Link Sign In ---------- */
+.login-text {
+  margin: 14px 0 0;
+  text-align: center;
+}
+
+.link {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--reg-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 680px) {
+  .register-container {
+    grid-template-columns: 1fr;
+    top: 0;
+    transform: none;
+    margin: 24px auto;
+  }
+
+  .Brand {
+    border-right: none;
+    border-bottom: 2px solid #000;
+  }
+
+  .Brand::after {
+    margin-top: 20px;
+    font-size: 1.3rem;
+  }
+}

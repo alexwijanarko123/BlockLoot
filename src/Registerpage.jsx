@@ -12,17 +12,17 @@ export default function Register({ onNavigateToLogin }) {
 
   // Fungsi saat form disubmit
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const isValidEmail = (emailString) => {
+   e.preventDefault();
+   const isValidEmail = (emailString) => {
      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
      return regex.test(emailString);
-  };
+   };
 
-  const isValidPassword = (passwordString) => {
+   const isValidPassword = (passwordString) => {
     // Password harus memiliki minimal 8 karakter, setidaknya satu huruf besar, satu huruf kecil, satu angka, dan satu karakter khusus
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(passwordString);
-  }
+   }
 
     // Validasi sederhana
     if (!username || !password || !confirmPassword || !email || !gender) {
@@ -49,16 +49,32 @@ export default function Register({ onNavigateToLogin }) {
 
 
     // Data siap dikirim ke backend
-    const formData = {
-      username,
-      password,
-      gender,
-      email
-    };
+    // 1. Siapkan data
+    const formData = { username, password, gender, email };
+     //console.log('Data Registrasi Dikirim ke Backend:', formData); ini test before backend
+    try {
+      // 2. KIRIM DULU KE BACKEND (Tunggu responnya)
+      const response = await fetch('https://api.blockloot.com/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-    console.log('Data Registrasi Dikirim ke Backend:', formData);
-    alert('Registrasi berhasil!');
-    onNavigateToLogin(); // Redirect ke halaman login setelah registrasi berhasil
+      const result = await response.json();
+
+      // 3. JIKA SUKSES DARI SERVER, BARU TAMPILKAN ALERT & PINDAH HALAMAN
+      if (response.ok) {
+        alert('Registrasi berhasil!');
+        onNavigateToLogin(); // Pindah ke login
+      } else {
+        // Jika server menolak (misal: "Username sudah terdaftar")
+        setErrorMessage(result.message || 'Registrasi gagal!');
+      }
+    } catch (error) {
+      console.error('Error register:', error); // <-- gunakan error di sini
+      setErrorMessage('Tidak dapat terhubung ke server!');
+    }
+
   };
 
 
@@ -153,8 +169,10 @@ export default function Register({ onNavigateToLogin }) {
           </div>
           {/* Submit Button */}
           <button type="submit" className="btn-submit">
-            Daftar Sekarang
+            Register
           </button>
+          <p><a href="/login" className="link" onClick={(e) => { e.preventDefault();onNavigateToLogin();}}>Sign In
+            </a> </p>
         </form>
       </div>
     </div>
