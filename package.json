@@ -7,12 +7,19 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "npm --prefix backend start",
+    "server:dev": "npm --prefix backend run dev",
+    "chain:compile": "npm --prefix contracts run compile",
+    "chain:node": "npm --prefix contracts run node",
+    "chain:deploy": "npm --prefix contracts run deploy",
+    "chain:setup": "npm --prefix contracts run setup-local"
   },
   "dependencies": {
     "ethers": "^6.17.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

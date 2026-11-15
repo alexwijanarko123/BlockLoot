@@ -1,60 +1,94 @@
-import { useState } from 'react';
-import Register from './Registerpage';
-import LoginPage from './loginPage';
-import Homepage from './homepage';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { Web3Provider } from "./context/Web3Context";
 
-function App() {
-  // Cek apakah ada sesi login tersimpan di localStorage
-  const savedLoginStatus = localStorage.getItem('isLoggedIn') === 'true';
-  const savedUsername = localStorage.getItem('user') || 'User';
+import AdminPage from "./pages/AdminPage";
+import CatalogPage from "./pages/CatalogPage";
+import CreateDraftPage from "./pages/CreateDraftPage";
+import ItemDetailPage from "./pages/ItemDetailPage";
+import LandingPage from "./pages/LandingPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
+import OrdersPage from "./pages/OrdersPage";
+import ProfilePage from "./pages/ProfilePage";
+import SellerDashboardPage from "./pages/SellerDashboardPage";
 
-  // Halaman aktif: 'register' | 'login' | 'home'
-  const [page, setPage] = useState(savedLoginStatus ? 'home' : 'register');
-  const [currentUser, setCurrentUser] = useState(savedUsername);
+import "./App.css";
 
-  // Proteksi Route (Tanpa useEffect agar aman dari render ganda & lolos linter 100%)
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const activePage = (page === 'home' && !isLoggedIn) ? 'login' : page;
-
-  // Handler saat Login Berhasil
-  const handleLoginSuccess = (username) => {
-    const loggedInUser = username || 'User';
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('user', loggedInUser);
-    setCurrentUser(loggedInUser);
-    setPage('home');
-  };
-
-  // Handler saat Logout
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('user');
-    setCurrentUser('User');
-    setPage('login');
-  };
-
+export default function App() {
   return (
-    <div>
-      {activePage === 'register' && (
-        <Register onNavigateToLogin={() => setPage('login')} />
-      )}
+    <BrowserRouter>
+      <Web3Provider>
+        <div className="app-shell">
+          <Navbar />
+          <main className="app-main">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/catalog" element={<CatalogPage />} />
+              <Route path="/catalog/:id" element={<ItemDetailPage />} />
 
-      {activePage === 'login' && (
-        <LoginPage 
-          onNavigateToRegister={() => setPage('register')} 
-          onNavigateToHome={handleLoginSuccess}
-        />
-      )}
+              {/* Authenticated Routes */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders/:id"
+                element={
+                  <ProtectedRoute>
+                    <OrderDetailPage />
+                  </ProtectedRoute>
+                }
+              />
 
-      {activePage === 'home' && (
-        <Homepage 
-          username={currentUser} 
-          onLogout={handleLogout}
-        />
-      )}
-    </div>
+              {/* Seller Protected Routes */}
+              <Route
+                path="/seller"
+                element={
+                  <ProtectedRoute roles={["SELLER", "ADMIN"]}>
+                    <SellerDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/seller/drafts/new"
+                element={
+                  <ProtectedRoute roles={["SELLER", "ADMIN"]}>
+                    <CreateDraftPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin Protected Routes */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute roles={["ADMIN"]}>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </div>
+      </Web3Provider>
+    </BrowserRouter>
   );
 }
-
-export default App;

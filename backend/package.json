@@ -1,0 +1,19 @@
+{
+  "name": "blockloot-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API BlockLoot: autentikasi wallet, data item off-chain, dan transaksi marketplace on-chain.",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.17.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.5.0"
+  }
+}
