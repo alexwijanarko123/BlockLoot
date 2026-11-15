@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useWeb3 } from "../context/Web3Context";
 import { chainBuyItem, chainSubmit, getCatalogItem } from "../services/api";
 import { sendMarketplaceTx } from "../services/chain";
@@ -7,8 +7,7 @@ import "./ItemDetailPage.css";
 
 export default function ItemDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { address, token, role, login, loading: authLoading } = useWeb3();
+  const { address, token, login, loading: authLoading } = useWeb3();
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +81,7 @@ export default function ItemDetailPage() {
       const txHash = await sendMarketplaceTx(txPayload.tx);
 
       // 3. Laporkan receipt ke backend untuk update indexer / orders
-      const submitRes = await chainSubmit("buy", txHash);
+      await chainSubmit("buy", txHash);
 
       setBuySuccess({
         txHash,

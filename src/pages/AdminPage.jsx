@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useWeb3 } from "../context/Web3Context";
 import { chainGrantSeller, chainSubmit, getHealthCheck } from "../services/api";
 import { sendMarketplaceTx } from "../services/chain";
 import "./AdminPage.css";
 
 export default function AdminPage() {
-  const { address, role } = useWeb3();
+  const { address } = useWeb3();
 
   const [sellerCandidate, setSellerCandidate] = useState("");
   const [lookupAddress, setLookupAddress] = useState("");

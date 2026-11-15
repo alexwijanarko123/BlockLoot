@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useWeb3 } from "../context/Web3Context";
 import { createDraft } from "../services/api";
 import "./CreateDraftPage.css";
 
 export default function CreateDraftPage() {
   const navigate = useNavigate();
-  const { role } = useWeb3();
 
   const [title, setTitle] = useState("");
   const [story, setStory] = useState("");

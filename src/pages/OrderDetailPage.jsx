@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useWeb3 } from "../context/Web3Context";
 import {
@@ -25,7 +25,7 @@ export default function OrderDetailPage() {
   const [deliveryNote, setDeliveryNote] = useState("");
   const [showShipModal, setShowShipModal] = useState(false);
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     setLoading(true);
     setErr(null);
     try {
@@ -36,11 +36,11 @@ export default function OrderDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchOrder();
-  }, [id]);
+  }, [fetchOrder]);
 
   const isBuyer =
     address &&

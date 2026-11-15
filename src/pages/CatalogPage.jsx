@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getCatalog } from "../services/api";
 import "./CatalogPage.css";
@@ -11,18 +11,18 @@ export default function CatalogPage() {
   const [standardFilter, setStandardFilter] = useState("ALL");
   const [error, setError] = useState(null);
 
-  const fetchItems = () => {
+  const fetchItems = useCallback(() => {
     setLoading(true);
     setError(null);
     getCatalog({ status: statusFilter === "ALL" ? "" : statusFilter, q: search })
       .then((data) => setItems(data || []))
       .catch((err) => setError(err.message || "Gagal memuat katalog"))
       .finally(() => setLoading(false));
-  };
+  }, [statusFilter, search]);
 
   useEffect(() => {
     fetchItems();
-  }, [statusFilter]);
+  }, [fetchItems]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

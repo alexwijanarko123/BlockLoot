@@ -105,6 +105,7 @@ export function Web3Provider({ children }) {
   return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useWeb3() {
   const ctx = useContext(Web3Context);
   if (!ctx) throw new Error("useWeb3 must be used inside <Web3Provider>");

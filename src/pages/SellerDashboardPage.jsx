@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useWeb3 } from "../context/Web3Context";
 import {
@@ -15,7 +15,7 @@ import { sendMarketplaceTx } from "../services/chain";
 import "./SellerDashboardPage.css";
 
 export default function SellerDashboardPage() {
-  const { address, role } = useWeb3();
+  const { role } = useWeb3();
   const [activeTab, setActiveTab] = useState("drafts"); // 'drafts' | 'orders'
 
   const [drafts, setDrafts] = useState([]);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useWeb3 } from "../context/Web3Context";
 import {
@@ -11,7 +11,7 @@ import { sendMarketplaceTx } from "../services/chain";
 import "./OrdersPage.css";
 
 export default function OrdersPage() {
-  const { address, token } = useWeb3();
+  const { address } = useWeb3();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ export default function OrdersPage() {
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     setErr(null);
     try {
@@ -36,11 +36,11 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [asFilter, statusFilter]);
 
   useEffect(() => {
     fetchOrders();
-  }, [asFilter, statusFilter]);
+  }, [fetchOrders]);
 
   // Buyer: Confirm Delivery -> Releases escrow to seller
   const handleConfirmDelivery = async (orderId) => {
