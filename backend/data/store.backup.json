@@ -1,0 +1,39 @@
+{
+  "nonces": {
+    "0x09d8ed78b88ab47734e6d63c9399f6e93724bb7c": {
+      "message": "BlockLoot login\nAlamat: 0x09d8eD78B88AB47734E6D63C9399f6e93724BB7C\nNonce: d9e4999a893e036c4e55261cde3d128b\nWaktu: 2026-11-15T08:08:33.695Z\nTanda tangan ini hanya untuk masuk dan membaca role. Bukan transaksi.",
+      "expiresAt": "2026-11-15T08:18:33.695Z"
+    }
+  },
+  "drafts": [
+    {
+      "id": "36435003-c899-4454-9620-5d52bd0c3d13",
+      "seller": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "title": "Marcel Keren",
+      "story": "Marcel dari Binus kawokaow",
+      "stats": {
+        "Rarity": "Legendary",
+        "Attack": "150",
+        "Durability": "100%"
+      },
+      "priceWei": "50000000000000000",
+      "priceEth": "0.05",
+      "stock": "5",
+      "assetStandard": "ERC-1155",
+      "assetContract": null,
+      "tokenId": null,
+      "imagePath": "/uploads/1794726640858-9eb7ec1848b5b832.png",
+      "status": "LISTED",
+      "listingId": "1",
+      "metadataURI": "http://localhost:4000/api/items/36435003-c899-4454-9620-5d52bd0c3d13",
+      "createdAt": "2026-11-15T07:10:40.865Z",
+      "updatedAt": "2026-11-15T07:36:27.529Z",
+      "listTxHash": "0xe37d38567874a389fadec3654030649c642e2fa034f50d254fb1a34a467e576a"
+    }
+  ],
+  "profiles": [],
+  "orders": [],
+  "indexer": {
+    "lastBlock": 3
+  }
+}

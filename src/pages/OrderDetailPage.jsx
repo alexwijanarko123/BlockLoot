@@ -124,16 +124,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="order-detail-container">
-        <div className="detail-loading">
-          <div className="spinner"></div>
-          <p>Memuat log status pesanan on-chain...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   if (err && !order) {
     return (

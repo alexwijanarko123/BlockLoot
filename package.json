@@ -13,7 +13,8 @@
     "chain:compile": "npm --prefix contracts run compile",
     "chain:node": "npm --prefix contracts run node",
     "chain:deploy": "npm --prefix contracts run deploy",
-    "chain:setup": "npm --prefix contracts run setup-local"
+    "chain:setup": "npm --prefix contracts run setup-local",
+    "chain:inspect": "npm --prefix contracts run inspect"
   },
   "dependencies": {
     "ethers": "^6.17.0",

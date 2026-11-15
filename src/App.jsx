@@ -1,94 +1,63 @@
-import React from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { Web3Provider } from "./context/Web3Context";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Web3Provider } from './context/Web3Context';
+import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 
-import AdminPage from "./pages/AdminPage";
-import CatalogPage from "./pages/CatalogPage";
-import CreateDraftPage from "./pages/CreateDraftPage";
-import ItemDetailPage from "./pages/ItemDetailPage";
-import LandingPage from "./pages/LandingPage";
-import OrderDetailPage from "./pages/OrderDetailPage";
-import OrdersPage from "./pages/OrdersPage";
-import ProfilePage from "./pages/ProfilePage";
-import SellerDashboardPage from "./pages/SellerDashboardPage";
+import Register from './Registerpage';
+import LoginPage from './loginPage';
+import Homepage from './homepage';
+import ProfilePage from './profilepage';
 
-import "./App.css";
+import AdminPage from './pages/AdminPage';
+import CatalogPage from './pages/CatalogPage';
+import CreateDraftPage from './pages/CreateDraftPage';
+import ItemDetailPage from './pages/ItemDetailPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import OrdersPage from './pages/OrdersPage';
+import SellerDashboardPage from './pages/SellerDashboardPage';
 
-export default function App() {
+import './App.css';
+
+// Layout bergaya homepage: header KrypGear + konten halaman
+function Layout() {
+  return (
+    <div className="homepage-container">
+      <Navbar />
+      <div className="app-content">
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
+function App() {
   return (
     <BrowserRouter>
       <Web3Provider>
-        <div className="app-shell">
-          <Navbar />
-          <main className="app-main">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/catalog" element={<CatalogPage />} />
-              <Route path="/catalog/:id" element={<ItemDetailPage />} />
+        <Routes>
+          {/* Halaman auth layar penuh (desain Register/Login) */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<LoginPage />} />
 
-              {/* Authenticated Routes */}
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <OrdersPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders/:id"
-                element={
-                  <ProtectedRoute>
-                    <OrderDetailPage />
-                  </ProtectedRoute>
-                }
-              />
+          <Route element={<Layout />}>
+            <Route path="/" element={<Homepage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
+            <Route path="/catalog/:id" element={<ItemDetailPage />} />
 
-              {/* Seller Protected Routes */}
-              <Route
-                path="/seller"
-                element={
-                  <ProtectedRoute roles={["SELLER", "ADMIN"]}>
-                    <SellerDashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/seller/drafts/new"
-                element={
-                  <ProtectedRoute roles={["SELLER", "ADMIN"]}>
-                    <CreateDraftPage />
-                  </ProtectedRoute>
-                }
-              />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+            <Route path="/orders/:id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
 
-              {/* Admin Protected Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute roles={["ADMIN"]}>
-                    <AdminPage />
-                  </ProtectedRoute>
-                }
-              />
+            <Route path="/seller" element={<ProtectedRoute roles={['SELLER', 'ADMIN']}><SellerDashboardPage /></ProtectedRoute>} />
+            <Route path="/seller/drafts/new" element={<ProtectedRoute roles={['SELLER', 'ADMIN']}><CreateDraftPage /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute roles={['ADMIN']}><AdminPage /></ProtectedRoute>} />
+          </Route>
 
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </Web3Provider>
     </BrowserRouter>
   );
 }
+
+export default App;

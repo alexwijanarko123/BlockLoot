@@ -1,186 +1,68 @@
 import { useState, useEffect } from 'react';
-import { BrowserProvider } from 'ethers';
+import { Link, useNavigate } from 'react-router-dom';
+import { useWeb3 } from './context/Web3Context';
+import { getProducts } from './services/api';
 import './homepage.css';
 
-// ============================================================================
-// ⚙️ KONFIGURASI MODE:
-// Ubah `USE_BACKEND = true` jika server backend API Anda sudah aktif.
-// Biarkan `USE_BACKEND = false` untuk testing lokal di frontend (menggunakan data dummy).
-// ============================================================================
-const USE_BACKEND = false;
+const formatAddress = (addr) =>
+  addr ? `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}` : '';
 
-// ----------------------------------------------------------------------------
-// [SKENARIO 1: LOKAL FRONTEND ONLY] Data dummy untuk uji coba tampilan lokal
-// ----------------------------------------------------------------------------
-const DUMMY_PRODUCTS = [
-  {
-    id: '1',
-    title: 'Pac man original game',
-    price: '1.99',
-    image: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=150&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '2',
-    title: 'Clash of Clans Town Hall 18',
-    price: '2.99',
-    image: 'https://images.unsplash.com/photo-1563089145-599997674d42?w=150&auto=format&fit=crop&q=80'
-  },
-  {
-    id: '3',
-    title: 'Clash Royale Maxed Acc',
-    price: '2.99',
-    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=150&auto=format&fit=crop&q=80'
-  }
-];
+export default function Homepage() {
+  const navigate = useNavigate();
+  const { address, token, role, login, loading: isConnecting, error: walletError } = useWeb3();
 
-export default function Homepage({ 
-  username = 'User', 
-  onNavigateToProfile, 
-  onLogout 
-}) {
-  // State produk: jika mode lokal pakai dummy, jika backend mulai dengan array kosong
-  const [products, setProducts] = useState(USE_BACKEND ? [] : DUMMY_PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [walletError, setWalletError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [sortAsc, setSortAsc] = useState(null); // null | true | false
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // --------------------------------------------------------------------------
-  // [SKENARIO 2: KONEKSI KE BACKEND API]
-  // Bagian ini akan otomatis aktif jika USE_BACKEND = true
-  // --------------------------------------------------------------------------
+  // Ambil produk aktif dari backend (data on-chain + off-chain)
   useEffect(() => {
-    if (!USE_BACKEND) {
-      // Mode Lokal: Tidak perlu memanggil API server
-      return;
-    }
+    let mounted = true;
+    getProducts()
+      .then((data) => mounted && setProducts(data || []))
+      .catch((err) => console.error('Gagal mengambil produk:', err))
+      .finally(() => mounted && setIsLoading(false));
+    return () => { mounted = false; };
+  }, [reloadKey]);
 
-    /*
-     * KODE INTEGRASI BACKEND:
-     * Mengambil daftar produk dari endpoint API server saat halaman dibuka
-     */
-    const fetchProductsFromBackend = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('https://api.blockloot.com/api/products', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-            // Nanti jika butuh autentikasi token, buka komentar baris di bawah:
-            // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+  const reload = () => { setIsLoading(true); setReloadKey((k) => k + 1); };
 
-        const data = await response.json();
-
-        if (response.ok) {
-          // Simpan data produk asli dari database backend
-          setProducts(data);
-        } else {
-          console.error('Gagal mengambil data produk dari server:', data.message);
-        }
-      } catch (error) {
-        console.error('Koneksi server produk gagal:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProductsFromBackend();
-  }, []);
-
-  // Filter produk berdasarkan input pencarian
-  const filteredProducts = products.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  let filteredProducts = products.filter((item) =>
+    (item.title || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
+  if (sortAsc !== null) {
+    filteredProducts = [...filteredProducts].sort((a, b) =>
+      sortAsc ? parseFloat(a.price) - parseFloat(b.price) : parseFloat(b.price) - parseFloat(a.price)
+    );
+  }
 
-  // Koneksi ke MetaMask (Web3 / Ethers)
-  const connectMetaMask = async () => {
-    if (typeof window.ethereum === 'undefined') {
-      alert('MetaMask belum terpasang di browser!');
-      return;
-    }
-
-    try {
-      setIsConnecting(true);
-      setWalletError('');
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []);
-
-      if (accounts && accounts.length > 0) {
-        setWalletAddress(accounts[0]);
-      }
-    } catch (err) {
-      console.error('Koneksi MetaMask dibatalkan:', err);
-      setWalletError('Koneksi MetaMask dibatalkan.');
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const formatAddress = (addr) => {
-    if (!addr) return '';
-    return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-  };
-
-  const handleAddMoreItems = () => {
-    if (USE_BACKEND) {
-      // Jika mode backend, lakukan re-fetch dari server
-      window.location.reload();
-    } else {
-      // Jika mode lokal, reset kembali ke data dummy
-      setProducts(DUMMY_PRODUCTS);
-    }
-    setSearchQuery('');
-  };
+  const canSell = token && (role === 'SELLER' || role === 'ADMIN');
 
   return (
-    <div className="homepage-container">
-      {/* ---------- Header / Navbar ---------- */}
-      <header className="home-navbar">
-        <div className="brand-group">
-          <div className="brand-logo-circle" />
-          <span className="brand-title">KrypGear</span>
-        </div>
-
-        <div className="user-group">
-          <div className="user-text">
-            <span className="welcome-text">Welcome</span>
-            <span className="username-text">{username}</span>
-          </div>
-          {/* Avatar profil: klik untuk buka halaman profile */}
-          <div 
-            className="user-avatar-circle" 
-            onClick={onNavigateToProfile || onLogout} 
-            title="Klik untuk melihat profil"
-          />
-        </div>
-      </header>
-
-      {/* ---------- Opsi Complete Credential / MetaMask ---------- */}
+    <>
+      {/* ---------- Complete Credential / MetaMask ---------- */}
       <div className="credential-section">
-        {!walletAddress ? (
+        {!token ? (
           <div className="credential-card">
             <div className="credential-info">
               <span className="credential-badge">Pending Credential</span>
               <p>Complete your credential by connecting your Web3 wallet</p>
             </div>
-            <button 
-              className="btn-connect-wallet" 
-              onClick={connectMetaMask} 
-              disabled={isConnecting}
-            >
+            <button className="btn-connect-wallet" onClick={login} disabled={isConnecting}>
               {isConnecting ? 'Connecting...' : '🦊 Connect MetaMask'}
             </button>
           </div>
         ) : (
           <div className="wallet-connected-pill">
             <span className="dot-green" />
-            <span>Wallet Connected: <strong>{formatAddress(walletAddress)}</strong></span>
+            <span>
+              Wallet Connected: <strong>{formatAddress(address)}</strong> · {role}
+            </span>
           </div>
         )}
-        {walletError && <p className="wallet-error">{walletError}</p>}
+        {walletError && !token && <p className="wallet-error">{walletError}</p>}
       </div>
 
       {/* ---------- Hero Tagline ---------- */}
@@ -190,7 +72,6 @@ export default function Homepage({
           of Blockchain.
         </h1>
 
-        {/* Search Bar */}
         <div className="search-wrapper">
           <input
             type="text"
@@ -199,98 +80,74 @@ export default function Homepage({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <svg
-            className="search-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg className="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </div>
       </section>
 
-      {/* ---------- Actions Bar (Highlight & Filter) ---------- */}
+      {/* ---------- Actions Bar ---------- */}
       <div className="actions-bar">
-        <button 
-          className="btn-product-highlight" 
-          type="button"
-          onClick={() => setProducts(DUMMY_PRODUCTS)}
-        >
+        <button className="btn-product-highlight" type="button" onClick={() => { setSortAsc(null); setSearchQuery(''); reload(); }}>
           <span className="fire-icon">🔥</span>
           <span>Product Highlight</span>
         </button>
 
-        <button 
-          className="btn-filter" 
+        <button
+          className="btn-filter"
           type="button"
-          onClick={() => setProducts(products.length ? [] : DUMMY_PRODUCTS)}
-          title="Klik untuk mencoba tampilan Empty State"
+          onClick={() => setSortAsc((v) => (v === null ? true : v ? false : null))}
+          title="Urutkan berdasarkan harga"
         >
-          <svg
-            className="filter-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg className="filter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
           </svg>
-          <span>Filter</span>
+          <span>Filter{sortAsc === null ? '' : sortAsc ? ' ↑ Harga' : ' ↓ Harga'}</span>
         </button>
       </div>
 
-      {/* Divider */}
       <div className="divider-line" />
 
-      {/* ---------- Content Area (Grid Produk vs Empty State) ---------- */}
+      {/* ---------- Content Area ---------- */}
       <main className="content-area">
-        {isLoading ? (
-          <div className="empty-state">
-            <h2 className="empty-title">Loading products...</h2>
-          </div>
-        ) : filteredProducts.length === 0 ? (
+        {isLoading ? null : filteredProducts.length === 0 ? (
           <div className="empty-state">
             <h2 className="empty-title">No Item Found</h2>
-            <button 
-              className="btn-add-items" 
-              type="button" 
-              onClick={handleAddMoreItems}
-            >
-              Add More Items
-            </button>
+            {canSell ? (
+              <button className="btn-add-items" type="button" onClick={() => navigate('/seller/drafts/new')}>
+                Add More Items
+              </button>
+            ) : (
+              <button className="btn-add-items" type="button" onClick={() => { setSearchQuery(''); reload(); }}>
+                Refresh
+              </button>
+            )}
           </div>
         ) : (
           <div className="product-grid">
             {filteredProducts.map((item) => (
-              <div key={item.id} className="product-card">
+              <Link key={item.id} to={`/catalog/${item.id}`} className="product-card" style={{ textDecoration: 'none' }}>
                 <div className="product-img-wrapper">
-                  <img src={item.image} alt={item.title} className="product-img" />
+                  {item.image && <img src={item.image} alt={item.title} className="product-img" />}
                 </div>
                 <div className="product-details">
                   <h3 className="product-title">{item.title}</h3>
                   <div className="product-price">
-                    {/* Tether / USDT Icon */}
                     <svg className="usdt-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L3 8.5L12 21L21 8.5L12 2Z" fill="#2dd4bf" />
-                      <path d="M7.5 7.5H16.5V9H13V14H11V9H7.5V7.5Z" fill="#080e1a" />
+                      <path d="M12 2L5 12.2L12 16.2L19 12.2L12 2Z" fill="#2dd4bf" />
+                      <path d="M12 17.3L5 13.3L12 22L19 13.3L12 17.3Z" fill="#2dd4bf" />
                     </svg>
-                    <span className="price-text">{item.price} USDT</span>
+                    <span className="price-text">{item.price} ETH</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
       </main>
-    </div>
+    </>
   );
 }

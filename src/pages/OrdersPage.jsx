@@ -148,12 +148,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Orders Grid/List */}
-      {loading ? (
-        <div className="orders-loading">
-          <div className="spinner"></div>
-          <p>Memuat riwayat transaksi pesanan...</p>
-        </div>
-      ) : orders.length === 0 ? (
+      {loading ? null : orders.length === 0 ? (
         <div className="orders-empty">
           <div className="empty-icon">📜</div>
           <h3>Belum Ada Transaksi</h3>

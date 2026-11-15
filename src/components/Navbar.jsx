@@ -1,111 +1,63 @@
-import { Link, NavLink } from "react-router-dom";
-import { useWeb3 } from "../context/Web3Context";
-import "./Navbar.css";
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useWeb3 } from '../context/Web3Context';
+import { getProfile } from '../services/api';
+import '../homepage.css';
+import './Navbar.css';
 
-function truncate(addr) {
-  if (!addr) return "";
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
+const short = (a) => (a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '');
 
 export default function Navbar() {
-  const { address, token, role, loading, login, logout } = useWeb3();
+  const navigate = useNavigate();
+  const { address, token, role, logout } = useWeb3();
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    if (!token) return;
+    let mounted = true;
+    getProfile().then((p) => mounted && setName(p.displayName || '')).catch(() => {});
+    return () => { mounted = false; };
+  }, [token]);
 
   return (
-    <header className="navbar-wrapper">
-      <nav className="navbar">
-        <Link to="/" className="navbar__brand">
-          <span className="brand-logo-icon">⚔️</span>
-          <span className="brand-text">BlockLoot</span>
-        </Link>
+    <header className="home-navbar">
+      <Link to="/" className="brand-group" style={{ textDecoration: 'none' }}>
+        <div className="brand-logo-circle" />
+        <span className="brand-title">KrypGear</span>
+      </Link>
 
-        <ul className="navbar__links">
-          <li>
-            <NavLink
-              to="/catalog"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
-              🎮 Katalog Item
-            </NavLink>
-          </li>
-          {token && (
-            <>
-              <li>
-                <NavLink
-                  to="/orders"
-                  className={({ isActive }) => (isActive ? "active" : "")}
-                >
-                  📜 Pesanan & Escrow
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/profile"
-                  className={({ isActive }) => (isActive ? "active" : "")}
-                >
-                  👤 Profil
-                </NavLink>
-              </li>
-              {(role === "SELLER" || role === "ADMIN") && (
-                <li>
-                  <NavLink
-                    to="/seller"
-                    className={({ isActive }) =>
-                      isActive ? "active seller-nav-link" : "seller-nav-link"
-                    }
-                  >
-                    📦 Seller Dashboard
-                  </NavLink>
-                </li>
-              )}
-              {role === "ADMIN" && (
-                <li>
-                  <NavLink
-                    to="/admin"
-                    className={({ isActive }) =>
-                      isActive ? "active admin-nav-link" : "admin-nav-link"
-                    }
-                  >
-                    🛡️ Admin
-                  </NavLink>
-                </li>
-              )}
-            </>
-          )}
-        </ul>
+      {token && (
+        <nav className="nav-links">
+          <NavLink to="/catalog">Catalog</NavLink>
+          <NavLink to="/orders">Orders</NavLink>
+          {(role === 'SELLER' || role === 'ADMIN') && <NavLink to="/seller">Seller</NavLink>}
+          {role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
+        </nav>
+      )}
 
-        <div className="navbar__right">
-          {token && role && (
-            <span className={`navbar__role-badge navbar__role-badge--${role}`}>
-              {role}
-            </span>
-          )}
-
-          {!token ? (
-            <button
-              className="navbar__connect-btn"
-              onClick={login}
-              disabled={loading}
-            >
-              <span className="fox-icon">🦊</span>
-              <span>{loading ? "Menghubungkan..." : "Connect Wallet"}</span>
-            </button>
-          ) : (
-            <div className="user-connected-group">
-              <span className="wallet-chip" title={address}>
-                <span className="connected-dot"></span>
-                {truncate(address)}
-              </span>
-              <button
-                className="navbar__logout-btn"
-                onClick={logout}
-                title="Disconnect Wallet"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+      {token ? (
+        <div className="user-group">
+          <div className="user-text">
+            <span className="welcome-text">Welcome · {role}</span>
+            <span className="username-text">{name || short(address)}</span>
+          </div>
+          <div
+            className="user-avatar-circle"
+            onClick={() => navigate('/profile')}
+            title="Klik untuk melihat profil"
+          />
+          <button
+            className="btn-logout"
+            onClick={() => { logout(); navigate('/login'); }}
+          >
+            Logout
+          </button>
         </div>
-      </nav>
+      ) : (
+        <div className="user-group">
+          <button className="btn-connect-wallet" onClick={() => navigate('/login')}>Login</button>
+        </div>
+      )}
     </header>
   );
 }

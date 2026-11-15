@@ -96,16 +96,7 @@ export default function ItemDetailPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="detail-container">
-        <div className="detail-loading">
-          <div className="spinner"></div>
-          <p>Memuat detail item...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   if (error && !item) {
     return (

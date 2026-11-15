@@ -215,12 +215,7 @@ export default function SellerDashboardPage() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="seller-loading">
-          <div className="spinner"></div>
-          <p>Memuat data seller...</p>
-        </div>
-      ) : activeTab === "drafts" ? (
+      {loading ? null : activeTab === "drafts" ? (
         /* DRAFTS TAB */
         <div className="drafts-section">
           {drafts.length === 0 ? (

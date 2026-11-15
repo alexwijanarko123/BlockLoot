@@ -97,12 +97,7 @@ export default function CatalogPage() {
       {/* Main Grid Content */}
       {error && <div className="catalog-error-box">⚠️ {error}</div>}
 
-      {loading ? (
-        <div className="catalog-loading">
-          <div className="spinner"></div>
-          <p>Memuat katalog item...</p>
-        </div>
-      ) : filteredItems.length === 0 ? (
+      {loading ? null : filteredItems.length === 0 ? (
         <div className="catalog-empty">
           <div className="empty-icon">🎮</div>
           <h3>Tidak Ada Item Ditemukan</h3>

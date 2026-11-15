@@ -74,9 +74,15 @@ export function Web3Provider({ children }) {
       // Verify on backend
       const result = await verifySignature(walletAddress, signature);
 
+      // Simpan sinkron agar request API berikutnya langsung memakai token ini
+      localStorage.setItem(LS_TOKEN, result.token);
+      localStorage.setItem(LS_ADDRESS, result.address);
+      localStorage.setItem(LS_ROLE, result.role);
+
       setAddress(result.address);
       setToken(result.token);
       setRole(result.role);
+      return result;
     } catch (err) {
       setError(err.message || "Login failed");
       throw err;

@@ -1,48 +1,24 @@
 import { useState } from 'react';
-import './Login.css'; // Opsional kalau mau buat file CSS terpisah
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useWeb3 } from './context/Web3Context';
+import './login.css';
 
-export default function Login({ onNavigateToRegister, onNavigateToHome }) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-   
-    const handleSubmit = async (e) => {
-     e.preventDefault();
+export default function Login() {
+  const navigate = useNavigate();
+  const { token, login, loading } = useWeb3();
+  const [errorMessage, setErrorMessage] = useState('');
 
-    if (!username || !password ) {
-      setErrorMessage('Semua kolom form wajib diisi!');
-      return;
-    }
+  if (token) return <Navigate to="/" replace />;
 
-    if (password !== confirmPassword) {
-      setErrorMessage('Password dan Confirm Password tidak cocok!');
-      return;
-    }
-
-    const formData = { username, password };
-    //console.log('Data Login Dikirim ke Backend:', formData); //ini test before backend
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMessage('');
     try {
-      const response = await fetch('https://api.blockloot.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const result = await response.json();
-
-      // 3. JIKA SUKSES DARI SERVER, BARU TAMPILKAN ALERT & PINDAH HALAMAN
-      if (response.ok) {
-        alert('Login berhasil!');
-        onNavigateToHome(); // Pindah ke home
-      } else {
-        // Jika server menolak (misal: "Username sudah terdaftar")
-        setErrorMessage(result.message || 'Login gagal!');
-      }
-    } catch (error) {
-      console.error('Error login:', error); // <-- gunakan error di sini
-      setErrorMessage('Tidak dapat terhubung ke server!');
+      await login(); // connect MetaMask -> sign challenge -> JWT + role
+      navigate('/');
+    } catch (err) {
+      setErrorMessage(err.message || 'Login gagal!');
     }
-
   };
 
   return (
@@ -53,38 +29,25 @@ export default function Login({ onNavigateToRegister, onNavigateToHome }) {
       </div>
 
       <div className="register-card">
-        <p className="subtitle">Login Page  </p>
-        <form onSubmit={handleSubmit} className="register-form">
-          {/* Username */}
+        <p className="subtitle">Login Page</p>
+        <form onSubmit={handleLogin} className="register-form">
           <div className="input-group">
-            <label>Username</label>
-            <input
-              type="text"
-              placeholder="Masukkan username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-
-          {/* Password */}
-          <div className="input-group">
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Masukan password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <p className="web3-hint">
+              Hubungkan wallet MetaMask dan tanda tangani pesan untuk masuk.
+              Role (Admin / Seller / Buyer) dibaca dari smart contract.
+            </p>
           </div>
 
           <div className="error-message">
             {errorMessage && <p>{errorMessage}</p>}
           </div>
 
-          <button type="submit" className="btn-submit">
-            Login
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? 'Connecting...' : '🦊 Connect MetaMask'}
           </button>
-          <p><span className="link" onClick={onNavigateToRegister}>Sign Up</span></p>
+          <p>
+            <span className="link" onClick={() => navigate('/register')}>Sign Up</span>
+          </p>
         </form>
       </div>
     </div>
